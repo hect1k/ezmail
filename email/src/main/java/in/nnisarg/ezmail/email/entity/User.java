@@ -1,4 +1,4 @@
-package in.nnisarg.ezmail.user.entity;
+package in.nnisarg.ezmail.email.entity;
 
 import java.util.UUID;
 

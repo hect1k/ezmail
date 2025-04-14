@@ -25,8 +25,9 @@ public class UserService {
 
 	public User register(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setApiToken(jwtUtil.generateToken(user.getId()));
-		return userRepository.save(user);
+		User savedUser = userRepository.save(user);
+		savedUser.setApiToken(jwtUtil.generateToken(savedUser.getId()));
+		return userRepository.save(savedUser);
 	}
 
 	public Optional<String> login(String email, String rawPassword) {

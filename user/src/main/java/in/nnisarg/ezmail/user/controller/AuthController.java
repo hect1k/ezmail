@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @RestController
-@RequestMapping
+@RequestMapping("/users")
 public class AuthController {
 	private final UserService userService;
 
