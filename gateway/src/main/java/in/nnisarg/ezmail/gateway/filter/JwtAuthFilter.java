@@ -17,7 +17,7 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
 
 	private final JwtUtil jwtUtil;
 	private static final Set<String> PUBLIC_PATHS = Set.of(
-			"/send",
+			"/emails/send",
 			"/users/login",
 			"/users/register");
 

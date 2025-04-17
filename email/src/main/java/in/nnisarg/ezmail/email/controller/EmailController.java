@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/emails")
@@ -64,8 +63,6 @@ public class EmailController {
 			@RequestHeader("Api-Token") String apiToken,
 			@RequestBody SendEmailRequest request) {
 		Optional<User> user = userRepository.findByApiToken(apiToken);
-
-		System.out.println(apiToken);
 
 		if (!user.isPresent()) {
 			return ResponseEntity.status(401).body("Invalid API token");

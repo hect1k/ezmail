@@ -15,7 +15,9 @@ public class SecurityConfig {
 		return http.csrf(ServerHttpSecurity.CsrfSpec::disable).authorizeExchange(exchanges -> exchanges.pathMatchers(
 				"/send",
 				"/register",
-				"/login").permitAll().anyExchange().authenticated()).httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+				"/login",
+				"/profile").permitAll().anyExchange().authenticated())
+				.httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
 				.formLogin(ServerHttpSecurity.FormLoginSpec::disable).build();
 	}
 }

@@ -1,0 +1,100 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ezmail
+
+  registry:
+    build: ./registry
+    ports:
+      - "8761:8761"
+    networks:
+      - ezmail
+    environment:
+      - eureka.client.register-with-eureka=false
+      - eureka.client.fetch-registry=false
+      - eureka.server.enable-self-preservation=false
+    healthcheck:
+      test: curl --silent --fail http://localhost:8761/ || exit 1
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 5s
+
+  user:
+    build: ./user
+    depends_on:
+      postgres:
+        condition: service_healthy
+      registry:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mydb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pass
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://registry:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: user
+    networks:
+      - ezmail
+
+  email:
+    build: ./email
+    depends_on:
+      postgres:
+        condition: service_healthy
+      registry:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mydb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pass
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://registry:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: email
+    networks:
+      - ezmail
+
+  billing:
+    build: ./billing
+    depends_on:
+      postgres:
+        condition: service_healthy
+      registry:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mydb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pass
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://registry:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: billing
+    networks:
+      - ezmail
+
+  gateway:
+    build: ./gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://registry:8761/eureka/
+    depends_on:
+      registry:
+        condition: service_healthy
+    networks:
+      - ezmail
+
+volumes:
+  pgdata:
+
+networks:
+  ezmail:
+    driver: bridge
